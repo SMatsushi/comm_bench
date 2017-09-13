@@ -1,4 +1,14 @@
+ifeq ($(CC),icc)
+ CC=mpiicc
+ COPTS=-O3 -qopenmp -xCORE-AVX2
+else
+ CC=mpicc
+ COPTS=-O3 -qopenmp -xCORE-AVX2
+endif
+
 cpu2cpu:
-	mpiicc -O3 -qopenmp -xCORE-AVX2 -o cpu2cpu cpu2cpu.c
+	${CC} ${COPTS} -o cpu2cpu cpu2cpu.c
 cpu2gpu:
-	mpiicc -O3 -qopenmp -xCORE-AVX2 -o cpu2gpu -lcudart cpu2gpu.c
+	${CC} ${COPTS} -o cpu2gpu -lcudart cpu2gpu.c
+gpu2gpu:
+	${CC} ${COPTS} -o gpu2gpu -lcudart gpu2gpu.c

@@ -1,0 +1,3 @@
+#!/bin/sh
+export CUDA_VISIBLE_DEVICES=${OMPI_COMM_WORLD_RANK}
+./gpu2gpu 1000 100

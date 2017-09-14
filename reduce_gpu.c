@@ -39,14 +39,16 @@ int main(int argc, char **argv)
   cudaMemcpy(&d_rbuf, rbuf, sizeof(double)*N, cudaMemcpyHostToDevice);
   cudaMemcpy(&d_sbuf, sbuf, sizeof(double)*N, cudaMemcpyHostToDevice);
 
+  printf("before MPI_Reduce\n"); fflush(stdout);
   ierr = MPI_Barrier(MPI_COMM_WORLD);
   time = MPI_Wtime();
-  for(i=0; i<loops; i++){
-	ierr = MPI_Reduce(d_sbuf, d_rbuf, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  }
+  //for(i=0; i<loops; i++){
+    ierr = MPI_Reduce(d_sbuf, d_rbuf, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    //}
   time = MPI_Wtime() - time;
+  printf("after  MPI_Reduce\n"); fflush(stdout);
 
-  cudaMemcpy(rbuf, d_rbuf, sizeof(double)*N, cudaMemcpyHostToDevice);
+  cudaMemcpy(rbuf, d_rbuf, sizeof(double)*N, cudaMemcpyDeviceToHost);
   if(myid==0){
 	printf("result: %e\n", rbuf[0]);
   }

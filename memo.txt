@@ -1,3 +1,28 @@
+NCCL test on Reedbush-H
+
+使用moduleは以下の通り
+module load cuda/8.0.44 intel/17.0.1.132 mvapich2-gdr/2.2/intel
+
+nccl2を拾ってきて、./ncclとして見えるにように置く
+(./nccl/includeと./nccl/lib64が見えるようにしておく）
+
+SYS=rbh make reduce_nccl
+(mpicc -O3 -qopenmp -xCORE-AVX2 -o reduce_nccl -lcudart -I/lustre/app/acc/cuda/8.0.44/include -L/lustre/app/acc/cuda/8.0.44/lib64 -I./nccl/include -L./nccl/lib -lnccl reduce_nccl.c に相当、cudaのディレクトリは参照しなくていいんじゃないかってのは置いておく)
+
+qsub rbh_reduce_nccl.sh
+プログラム中ではcudaSetDevice(0)している。
+23行目のCUDA_VISIBLE_DEVICESで1プロセス1GPUに制限しており
+cudaSetDevice(0)でノード内2プロセスがそれぞれ別のGPUを触りにいくはずだが、
+これだとncclReduce/ncclAllReduceが死ぬ。
+CUDA_VISIBLE_DEVICES設定を抜いて同じGPUを触らせると死なない。
+CUDA_VISIBLE_DEVICES設定を抜いてcudasetDevice(myid)にして別のGPUを触らせると死ぬ。
+
+NCCLの使い方が悪いのか、Reedbush-HのNVLINK周りがおかしいのか、どっちだろう？
+
+
+
+
+
 MVAPICH2-GDRを使う
 
 

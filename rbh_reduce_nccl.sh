@@ -20,7 +20,7 @@ export LD_LIBRARY_PATH=${NCCLDIR}/lib:${LD_LIBRARY_PATH}
 FILE=./rbh_reduce_nccl_run.sh
 cat<<EOF > ${FILE}
 #!/bin/sh
-#export CUDA_VISIBLE_DEVICES=\${MV2_COMM_WORLD_LOCAL_RANK}
+export CUDA_VISIBLE_DEVICES=\${MV2_COMM_WORLD_LOCAL_RANK}
 ./reduce_nccl 1000 100
 EOF
 chmod u+x ${FILE}

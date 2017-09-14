@@ -13,12 +13,16 @@ endif
 
 NCCLDIR=./nccl
 
-cpu2cpu:
-	${CC} ${COPTS} -o cpu2cpu cpu2cpu.c
-cpu2gpu:
-	${CC} ${COPTS} -o cpu2gpu -lcudart cpu2gpu.c
-gpu2gpu:
-	${CC} ${COPTS} -o gpu2gpu -lcudart gpu2gpu.c
+cpu2cpu: cpu2cpu.c
+	${CC} ${COPTS} -o $@ $^
+cpu2gpu: cpu2gpu.c
+	${CC} ${COPTS} -o $@ -lcudart $^
+gpu2gpu: gpu2gpu.c
+	${CC} ${COPTS} -o $@ -lcudart $^
+cpu2cpu2gpu: cpu2cpu2gpu.c
+	${CC} ${COPTS} -o $@ -lcudart $^
+gpu2cpu2cpu2gpu: gpu2cpu2cpu2gpu.c
+	${CC} ${COPTS} -o $@ -lcudart $^
 
 reduce_cpu: reduce_cpu.c
 	${CC} ${COPTS} -o $@ $^

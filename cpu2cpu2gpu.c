@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <cuda_runtime.h>
 
 int main(int argc, char **argv)
 {
@@ -10,7 +11,7 @@ int main(int argc, char **argv)
   MPI_Status status;
   int N = 1000, loops;
   double time, t_min=999999.99, t_max=0.0, t_sum=0.0;
-  double *data;
+  double *data, *d_data;
 
   if(argc!=3){
     printf("usage: %s length loops\n", argv[0]);
@@ -28,7 +29,11 @@ int main(int argc, char **argv)
     printf("2 processes are required.\n");
     return -1;
   }
+
   data = (double*)malloc(sizeof(double)*N);
+  if(myid==1){
+    cudaMalloc((void*)&d_data, sizeof(double)*N);
+  }
 
   ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<loops; i++){
@@ -42,6 +47,8 @@ int main(int argc, char **argv)
       t_sum += time;
     }else if(myid==1){
       ierr = MPI_Recv(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+      cudaMemcpy(d_data, data, sizeof(double)*N, cudaMemcpyHostToDevice);
+      cudaMemcpy(data, d_data, sizeof(double)*N, cudaMemcpyDeviceToHost);
       ierr = MPI_Send(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
@@ -53,6 +60,9 @@ int main(int argc, char **argv)
 	   );
   }
 
+  if(myid==1){
+    cudaFree(d_data);
+  }
   free(data);
 
   ierr = MPI_Finalize();

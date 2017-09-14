@@ -12,11 +12,11 @@ ulimit -s 1000000
 export OMP_NUM_THREADS=2
 export MV2_ENABLE_AFFINITY=0
 
-FILE=./rbh_gpu2gpu_run.sh
+FILE=./rbh_gpu2cpu2cpu2gpu_run.sh
 cat<<EOF > ${FILE}
 #!/bin/sh
 export CUDA_VISIBLE_DEVICES=\${MV2_COMM_WORLD_LOCAL_RANK}
-numactl --cpunodebind=\${MV2_COMM_WORLD_LOCAL_RANK} ./gpu2gpu 1000 100
+numactl --cpunodebind=\${MV2_COMM_WORLD_LOCAL_RANK} ./gpu2cpu2cpu2gpu 1000 100
 EOF
 chmod u+x ${FILE}
 

@@ -9,7 +9,7 @@ int main(int argc, char **argv)
   int myid, nprocs, ierr, provided;
   MPI_Status status;
   int N = 1000, loops;
-  double time;
+  double time, t_min=999999.99, t_max=0.0, t_sum=0.0;
   double *data, *d_data;
 
   if(argc!=3){
@@ -33,18 +33,27 @@ int main(int argc, char **argv)
   cudaMalloc(&d_data, sizeof(double)*N);
 
   ierr = MPI_Barrier(MPI_COMM_WORLD);
-  time = MPI_Wtime();
   for(i=0; i<loops; i++){
     if(myid==0){
+      time = MPI_Wtime();
       ierr = MPI_Send(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
       ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
+      time = MPI_Wtime() - time;
+      if(time>t_max)t_max=time;
+      if(time<t_min)t_min=time;
+      t_sum += time;
     }else if(myid==1){
       ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
       ierr = MPI_Send(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
-  time = MPI_Wtime() - time;
-  printf("TIME total %d : %e (average %e msec)\n", myid, time, time/(double)loops*1000.0);
+  if(myid==0){
+    printf("TIME %d : %e (average %e msec, min %e msec, max %e msec)\n", myid, t_sum,
+	   t_sum/(double)loops*1000.0,
+	   t_min/(double)loops*1000.0,
+	   t_max/(double)loops*1000.0
+	   );
+  }
 
   cudaFree(d_data);
   free(data);

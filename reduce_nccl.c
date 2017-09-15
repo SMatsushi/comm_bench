@@ -5,6 +5,13 @@
 #include <cuda_runtime.h>
 #include <nccl.h>
 
+void CHKERR(cudaError_t err, char *str)
+{
+  if(err!=cudaSuccess){
+    printf("%s failed\n", str); fflush(stdout);
+  }
+}
+
 int main(int argc, char **argv)
 {
   int i;
@@ -18,6 +25,7 @@ int main(int argc, char **argv)
   ncclComm_t comm;
   cudaStream_t stream;
   ncclUniqueId commId;
+  cudaError_t cudaErr;
 
   if(argc!=3){
 	printf("usage: %s length loops\n", argv[0]);
@@ -42,10 +50,15 @@ int main(int argc, char **argv)
   sbuf = (double*)malloc(sizeof(double)*N);
   for(i=0; i<N; i++)rbuf[i] = 0.0;
   for(i=0; i<N; i++)sbuf[i] = (double)(myid+1);
-  cudaMalloc((void*)&d_rbuf, sizeof(double)*N);
-  cudaMalloc((void*)&d_sbuf, sizeof(double)*N);
-  cudaMemcpy(&d_rbuf, rbuf, sizeof(double)*N, cudaMemcpyHostToDevice);
-  cudaMemcpy(&d_sbuf, sbuf, sizeof(double)*N, cudaMemcpyHostToDevice);
+  cudaSetDevice(0);
+  cudaErr = cudaMalloc((void*)&d_rbuf, sizeof(double)*N);
+  CHKERR(cudaErr, "malloc/d_rbuf");
+  cudaErr = cudaMalloc((void*)&d_sbuf, sizeof(double)*N);
+  CHKERR(cudaErr, "malloc/d_sbuf");
+  cudaErr = cudaMemcpy(d_rbuf, rbuf, sizeof(double)*N, cudaMemcpyHostToDevice);
+  CHKERR(cudaErr, "memcpy/d_rbuf");
+  cudaErr = cudaMemcpy(d_sbuf, sbuf, sizeof(double)*N, cudaMemcpyHostToDevice);
+  CHKERR(cudaErr, "memcpy/d_sbuf");
 
   if(myid==0){
     ncclRet = ncclGetUniqueId(&commId);
@@ -59,7 +72,6 @@ int main(int argc, char **argv)
   MPI_Barrier(MPI_COMM_WORLD);
 
   MPI_Bcast(&commId, NCCL_UNIQUE_ID_BYTES, MPI_CHAR, 0, MPI_COMM_WORLD);
-  cudaSetDevice(0);
   ncclRet = ncclCommInitRank(&comm, nprocs, commId, myid);
   if(ncclRet!=ncclSuccess){
     printf("ncclCommInitRank failed: %d\n", ncclRet);

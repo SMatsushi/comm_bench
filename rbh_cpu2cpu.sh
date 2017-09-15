@@ -14,7 +14,7 @@ export OMP_NUM_THREADS=1
 FILE=./rbh_cpu2cpu_run.sh
 cat<<EOF > ${FILE}
 #!/bin/sh
-numactl --cpunodebind=\${MV2_COMM_WORLD_LOCAL_RANK} ./cpu2cpu 1000 100
+numactl --cpunodebind=\${MV2_COMM_WORLD_LOCAL_RANK} --membind=\${MV2_COMM_WORLD_LOCAL_RANK} ./cpu2cpu 1000 100
 EOF
 chmod u+x ${FILE}
 

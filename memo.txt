@@ -20,35 +20,37 @@ CUDA_VISIBLE_DEVICES設定を抜いてcudasetDevice(myid)にして別のGPUを�
 NCCLの使い方が悪いのか、Reedbush-HのNVLINK周りがおかしいのか、どっちだろう？
 
 
+NCCLテスト
 
+1.
+ジョブスクリプトでcuda_visible_devicesを指定しない
+プログラム中でcudaSetDevice(myrank)により使うGPUを指定しない
+-> プロセスごとに1GPUしか使えない、使うGPUが衝突しないとは限らない
 
+2.
+ジョブスクリプトでcuda_visible_devicesを指定しない
+プログラム中でcudaSetDevice(myrank)により使うGPUを指定する
+-> cudaSetDeviceでGPUを衝突させられる
 
-MVAPICH2-GDRを使う
+3.
+ジョブスクリプトでcuda_visible_devicesを指定する
+プログラム中でcudaSetDevice(myrank)により使うGPUを指定しない
+-> CUDA_VISIBLE_DEVICESの設定が正しければ使うGPUは衝突しない、プロセスごとに1GPUしか使えない
 
+4.
+ジョブスクリプトでcuda_visible_devicesを指定する
+プログラム中でcudaSetDevice(myrank)により使うGPUを指定する
+-> CUDA_VISIBLE_DEVICESの設定が正しければcudaSetDeviceでもGPUを衝突させられないはず、プロセスごとに複数のGPUを使える
 
-#!/bin/bash
-#PBS -q h-debug
-#PBS -l select=1:mpiprocs=2
-#PBS -W group_list=gi75
-#PBS -l walltime=1:00
+CUDA_VISIBLE_DEVICES=0,1 + cudaSetDevice(0)
+-> rbh_reduce_nccl.sh.o666045 | うごいた
+CUDA_VISIBLE_DEVICES=0,1 + cudaSetDevice(myrank)
+-> rbh_reduce_nccl.sh.o666058 | 動いた
+CUDA_VISIBLE_DEVICES=rank + cudaSetDevice(0)
+-> rbh_reduce_nccl.sh.o666051 | NG, ncclCommInitRank failed
+CUDA_VISIBLE_DEVICES=rank + cudaSetDevice(myrank)
+-> rbh_reduce_nccl.sh.o666055 | NG, 1 cudaSetDevice failed: invalid device ordinal
 
-cd ${PBS_O_WORKDIR}
-env
-. /etc/profile.d/modules.sh
-module load cuda/8.0.44 intel/17.0.1.132 mvapich2-gdr/2.2/intel
-
-ulimit -s 1000000
-export OMP_NUM_THREADS=2
-export MV2_ENABLE_AFFINITY=0
-
-FILE=./rbh_gpu2gpu_run.sh
-cat<<EOF > ${FILE}
-#!/bin/sh
-export CUDA_VISIBLE_DEVICES=\${MV2_COMM_WORLD_LOCAL_RANK}
-./a.out
-EOF
-chmod u+x ${FILE}
-
-export MV2_USE_CUDA=1
-export MV2_USE_GPUDIRECT=1
-mpirun -np 2 -f ${PBS_NODEFILE} ${FILE}
+ジョブスクリプトから各MPIプロセスへは利用可能な全GPUのリストをCUDA_VISIBLE_DEVICESで引き渡す。
+プロセスごとに分けない。
+プログラム側で全GPUリストから実際に使いたいGPUを選べば良い。

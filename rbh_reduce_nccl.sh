@@ -8,7 +8,8 @@
 cd ${PBS_O_WORKDIR}
 env
 . /etc/profile.d/modules.sh
-module load cuda/8.0.44 intel/17.0.1.132 mvapich2-gdr/2.2/intel
+#module load cuda/8.0.44 intel/17.0.1.132 mvapich2-gdr/2.2/intel
+module load pbsutils cuda mvapich2-gdr/2.2/gnu
 
 ulimit -s 1000000
 export OMP_NUM_THREADS=2
@@ -20,11 +21,18 @@ export LD_LIBRARY_PATH=${NCCLDIR}/lib:${LD_LIBRARY_PATH}
 FILE=./rbh_reduce_nccl_run.sh
 cat<<EOF > ${FILE}
 #!/bin/sh
-export CUDA_VISIBLE_DEVICES=\${MV2_COMM_WORLD_LOCAL_RANK}
+#env
+#export CUDA_VISIBLE_DEVICES="\${MV2_COMM_WORLD_LOCAL_RANK}"
+export CUDA_VISIBLE_DEVICES="0,1"
+#echo \${CUDA_VISIBLE_DEVICES}
+#numactl --cpunodebind=\${CUDA_VISIBLE_DEVICES} --membind=\${CUDA_VISIBLE_DEVICES} ./reduce_nccl 1000 100
 ./reduce_nccl 1000 100
+# CUDA_VISIBLE_DEVICES="\${MV2_COMM_WORLD_LOCAL_RANK}" ./reduce_nccl 1000 100
 EOF
 chmod u+x ${FILE}
 
+export MV2_CPU_MAPPING=0
 export MV2_USE_CUDA=1
 export MV2_USE_GPUDIRECT=1
+export NCCL_DEBUG=WARN
 mpirun -np 2 -f ${PBS_NODEFILE} ${FILE}

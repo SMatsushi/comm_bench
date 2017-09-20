@@ -1,3 +1,3 @@
 #!/bin/sh
-#export CUDA_VISIBLE_DEVICES=${MV2_COMM_WORLD_LOCAL_RANK}
-./reduce_nccl 1000 100
+export CUDA_VISIBLE_DEVICES="0"
+numactl --cpunodebind=0 --membind=0 ./reduce_nccl2_2n1m 10000 100

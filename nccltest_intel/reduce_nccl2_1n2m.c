@@ -99,24 +99,26 @@ int main(int argc, char **argv)
   CHKERR(cudaErr, "memcpy/d_sbuf");
 
   cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
-  printf("before ncclReduce\n"); fflush(stdout);
+  printf("before ncclAllReduce\n"); fflush(stdout);
   ierr = MPI_Barrier(MPI_COMM_WORLD);
-  time = MPI_Wtime();
+  time = 0.0;
   ncclGroupStart();
   for(i=0; i<loops; i++){
+    printf("%d\n", i); fflush(stdout);
+    time = MPI_Wtime();
     //ierr = MPI_Reduce(d_sbuf, d_rbuf, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     //ncclRet = ncclReduce((const void*)d_sbuf, (void*)d_rbuf, 1, ncclDouble, ncclSum, 0, comm, stream);
     ncclRet = ncclAllReduce((const void*)d_sbuf, (void*)d_rbuf, N, ncclDouble, ncclSum, comm, stream);
     if(ncclRet!=ncclSuccess){
-      printf("ncclReduce failed: %d\n", ncclRet);
+      printf("ncclAllReduce failed: %d\n", ncclRet);
       printf("%s", ncclGetErrorString(ncclRet));
       return -1;
     }
     cudaStreamSynchronize(stream);
+    time += MPI_Wtime() - time;
   }
   ncclGroupEnd();
-  time = MPI_Wtime() - time;
-  printf("after  ncclReduce\n"); fflush(stdout);
+  printf("after  ncclAllReduce\n"); fflush(stdout);
   cudaStreamDestroy(stream);
 
   cudaMemcpy(rbuf, d_rbuf, sizeof(double)*N, cudaMemcpyDeviceToHost);

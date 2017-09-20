@@ -1,0 +1,12 @@
+NVLINKの動作チェックのようなもの。
+NVLINKがちゃんと使えれば、
+1GPU*2ノードと1ノード内2GPUで性能を比較した場合に
+NVLINK前者の性能が高くなるはず。
+
+このディレクトリにあるファイルは
+module load mvapich2-gdr/2.2/intel
+環境でビルドと実行をする前提のもの。
+NCCL2をダウンロードしてきてカレントディレクトリにNCCL2として置いてからmakeすること。
+CUDA_VISIBLE_DEVICES環境変数とnumactlとcudaSetDeviceで
+使うGPUをうまく指定しわけているつもりだが、
+ミスってないか不安はある。

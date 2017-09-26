@@ -40,6 +40,20 @@ int main(int argc, char **argv)
   cudaMalloc((void*)&d_data, sizeof(double)*N);
 
   ierr = MPI_Barrier(MPI_COMM_WORLD);
+  for(i=0; i<10; i++){
+    if(myrank==0){
+      cudaMemcpy(data, d_data, sizeof(double)*N, cudaMemcpyDeviceToHost);
+      ierr = MPI_Send(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+      ierr = MPI_Recv(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
+      cudaMemcpy(d_data, data, sizeof(double)*N, cudaMemcpyHostToDevice);
+    }else if(myrank==1){
+      ierr = MPI_Recv(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+      cudaMemcpy(d_data, data, sizeof(double)*N, cudaMemcpyHostToDevice);
+      cudaMemcpy(data, d_data, sizeof(double)*N, cudaMemcpyDeviceToHost);
+      ierr = MPI_Send(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+    }
+  }
+  ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<loops; i++){
     if(myrank==0){
       time = MPI_Wtime();

@@ -34,6 +34,11 @@ int main(int argc, char **argv)
   cudaMalloc((void*)&d_data, sizeof(double)*N);
 
   ierr = MPI_Barrier(MPI_COMM_WORLD);
+  for(i=0; i<10; i++){
+    cudaMemcpy(d_data, data, sizeof(double)*N, cudaMemcpyHostToDevice);
+    cudaMemcpy(data, d_data, sizeof(double)*N, cudaMemcpyDeviceToHost);
+  }
+  ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<loops; i++){
     time = MPI_Wtime();
     cudaMemcpy(d_data, data, sizeof(double)*N, cudaMemcpyHostToDevice);

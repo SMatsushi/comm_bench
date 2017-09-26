@@ -31,6 +31,16 @@ int main(int argc, char **argv)
   data = (double*)malloc(sizeof(double)*N);
 
   ierr = MPI_Barrier(MPI_COMM_WORLD);
+  for(i=0; i<10; i++){
+    if(myid==0){
+      ierr = MPI_Send(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+      ierr = MPI_Recv(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
+    }else if(myid==1){
+      ierr = MPI_Recv(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+      ierr = MPI_Send(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+    }
+  }
+  ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<loops; i++){
     if(myid==0){
       time = MPI_Wtime();

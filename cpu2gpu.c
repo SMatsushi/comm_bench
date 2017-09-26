@@ -43,6 +43,16 @@ int main(int argc, char **argv)
   }
 
   ierr = MPI_Barrier(MPI_COMM_WORLD);
+  for(i=0; i<10; i++){
+    if(myrank==0){
+      ierr = MPI_Send(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+      ierr = MPI_Recv(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
+    }else if(myrank==1){
+      ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
+      ierr = MPI_Send(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+    }
+  }
+  ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<loops; i++){
     if(myrank==0){
       time = MPI_Wtime();

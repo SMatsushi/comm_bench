@@ -12,8 +12,9 @@ int main(int argc, char **argv)
   int N = 1000, loops;
   double time, t_min=999999.99, t_max=0.0, t_sum=0.0;
   double *data, *d_data;
+  int gpu = -1;
 
-  if(argc!=3){
+  if(argc<3){
     printf("usage: %s length loops\n", argv[0]);
     return -1;
   }
@@ -30,10 +31,14 @@ int main(int argc, char **argv)
     printf("2 processes are required.\n");
     return -1;
   }
-
   data = (double*)malloc(sizeof(double)*N);
+
+  if(argc>=4)gpu = atoi(argv[3+myrank]);
   if(myrank==1){
-    cudaSetDevice(myrank);
+    if(gpu!=-1){
+      printf("%d cudaSetDevice(%d)\n", myrank, gpu);
+      cudaSetDevice(gpu);
+    }
     cudaMalloc((void*)&d_data, sizeof(double)*N);
   }
 
@@ -57,8 +62,8 @@ int main(int argc, char **argv)
   if(myrank==0){
     printf("TIME %d : %e (average %e msec, min %e msec, max %e msec)\n", myrank, t_sum,
 	   t_sum/(double)loops*1000.0,
-	   t_min/(double)loops*1000.0,
-	   t_max/(double)loops*1000.0
+	   t_min*1000.0,
+	   t_max*1000.0
 	   );
   }
 

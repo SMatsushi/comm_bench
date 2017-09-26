@@ -1,0 +1,21 @@
+Tue Sep 26 16:32:53 JST 2017
+cpu2cpu
+TIME 0 : 1.146793e-03 (average 1.146793e-02 msec, min 1.001358e-02 msec, max 1.034737e-01 msec)
+Tue Sep 26 16:32:54 JST 2017
+cpu2gpu
+1 cudaSetDevice(0)
+TIME 0 : 4.675865e-02 (average 4.675865e-01 msec, min 1.120567e-02 msec, max 4.559422e+01 msec)
+Tue Sep 26 16:32:55 JST 2017
+gpu2gpu
+0 cudaSetDevice(0)
+1 cudaSetDevice(0)
+TIME 0 : 4.712081e-02 (average 4.712081e-01 msec, min 1.168251e-02 msec, max 4.587078e+01 msec)
+Tue Sep 26 16:32:57 JST 2017
+cpu2cpu2gpu
+1 cudaSetDevice(0)
+TIME 0 : 3.726959e-03 (average 3.726959e-02 msec, min 3.337860e-02 msec, max 3.061295e-01 msec)
+Tue Sep 26 16:32:58 JST 2017
+gpu2cpu2cpu2gpu
+1 cudaSetDevice(0)
+0 cudaSetDevice(0)
+TIME 0 : 5.937338e-03 (average 5.937338e-02 msec, min 5.650520e-02 msec, max 1.611710e-01 msec)

@@ -45,8 +45,8 @@ int main(int argc, char **argv)
   }
   printf("TIME %d : %e (average %e msec, min %e msec, max %e msec)\n", myid, t_sum,
 	 t_sum/(double)loops*1000.0,
-	 t_min/(double)loops*1000.0,
-	 t_max/(double)loops*1000.0
+	 t_min*1000.0,
+	 t_max*1000.0
 	 );
 
   cudaFree(d_data);

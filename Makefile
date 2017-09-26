@@ -13,6 +13,8 @@ endif
 
 NCCLDIR=./nccl
 
+mpi: cuda cpu2cpu cpu2gpu gpu2gpu cpu2cpu2gpu gpu2cpu2cpu2gpu
+
 cuda: cuda.c
 	${CC} ${COPTS} -o $@ -lcudart $^
 cpu2cpu: cpu2cpu.c

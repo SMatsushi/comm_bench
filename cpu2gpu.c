@@ -33,6 +33,7 @@ int main(int argc, char **argv)
 
   data = (double*)malloc(sizeof(double)*N);
   if(myrank==1){
+    cudaSetDevice(myrank);
     cudaMalloc((void*)&d_data, sizeof(double)*N);
   }
 

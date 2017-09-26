@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <cuda_runtime.h>
 
 int main(int argc, char **argv)
 {

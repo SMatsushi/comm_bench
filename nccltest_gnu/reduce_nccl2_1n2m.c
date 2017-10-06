@@ -24,7 +24,7 @@ void CHKERR(cudaError_t err, char *str)
 int main(int argc, char **argv)
 {
   int i;
-  int myrank, nprocs, ierr, provided;
+  int myrank, nprocs, ierr;
   MPI_Status status;
   int N = 1000, loops;
   double time;
@@ -45,14 +45,10 @@ int main(int argc, char **argv)
   loops = atoi(argv[2]);
 
   MPI_Init(&argc, &argv);
-  /*
-  ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
-  if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
-  */
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-  if(nprocs!=2){
-	printf("2 processes are required.\n");
+  if(nprocs<2){
+	printf("2 or more than processes are required.\n");
 	return -1;
   }
   rbuf = (double*)malloc(sizeof(double)*N);

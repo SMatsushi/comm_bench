@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <mpi.h>
 
+#define min(a,b) (a<b?a:b)
+
 int main(int argc, char **argv)
 {
   int i;
@@ -20,15 +22,17 @@ int main(int argc, char **argv)
   N = atoi(argv[1]);
   loops = atoi(argv[2]);
 
-  ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
-  if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
+  //ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
+  //if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
+  MPI_Init(&argc,&argv);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
   if(nprocs!=2){
     printf("2 processes are required.\n");
     return -1;
   }
-  data = (double*)malloc(sizeof(double)*N);
+  data = (double*)malloc(sizeof(double)*N*2);
+  for(i=0;i<N*2;i++)data[i] = (double)i;
 
   ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<10; i++){
@@ -37,7 +41,7 @@ int main(int argc, char **argv)
       ierr = MPI_Recv(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
     }else if(myid==1){
       ierr = MPI_Recv(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-      ierr = MPI_Send(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+      ierr = MPI_Send(&data[N], N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
   ierr = MPI_Barrier(MPI_COMM_WORLD);
@@ -52,15 +56,23 @@ int main(int argc, char **argv)
       t_sum += time;
     }else if(myid==1){
       ierr = MPI_Recv(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-      ierr = MPI_Send(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+      ierr = MPI_Send(&data[N], N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
+  ierr = MPI_Barrier(MPI_COMM_WORLD);
   if(myid==0){
-    printf("TIME %d : %e (average %e msec, min %e msec, max %e msec)\n", myid, t_sum,
-	   t_sum/(double)loops*1000.0,
-	   t_min*1000.0,
-	   t_max*1000.0
+    printf("TIME %d : %e (average %e msec, min %e msec, max %e msec, average %f GByte/sec)\n",
+		   myid, t_sum,
+		   t_sum/(double)loops*1000.0,
+		   t_min*1000.0,
+		   t_max*1000.0,
+		   (double)(sizeof(double)*loops*N)*2.0/t_sum/1024.0/1024.0/1024.0
 	   );
+	printf("result:");
+	for(i=0;i<min(N,10);i++){
+	  printf(" %f", data[i]);
+	}
+	printf("\n\n");
   }
 
   free(data);

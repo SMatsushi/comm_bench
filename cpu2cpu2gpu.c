@@ -12,10 +12,10 @@ int main(int argc, char **argv)
   int N = 1000, loops;
   double time, t_min=999999.99, t_max=0.0, t_sum=0.0;
   double *data, *d_data;
-  int gpu = -1;
+  int gpu=-1;
 
-  if(argc<3){
-    printf("usage: %s length loops\n", argv[0]);
+  if(argc!=4){
+    printf("usage: %s length loops gpuid\n", argv[0]);
     return -1;
   }
 
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 
   //ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
   //if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
-  MPI_Init(&argc,&argv);
+  ierr = MPI_Init(&argc,&argv);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
   if(nprocs!=2){
@@ -33,12 +33,10 @@ int main(int argc, char **argv)
   }
   data = (double*)malloc(sizeof(double)*N);
 
-  if(argc>=4)gpu = atoi(argv[3+myrank]);
   if(myrank==1){
-    if(gpu!=-1){
-      printf("%d cudaSetDevice(%d)\n", myrank, gpu);
-      cudaSetDevice(gpu);
-    }
+	gpu = atoi(argv[3]);
+	printf("%d cudaSetDevice(%d)\n", myrank, gpu);
+	cudaSetDevice(gpu);
     cudaMalloc((void*)&d_data, sizeof(double)*N);
   }
 
@@ -71,6 +69,7 @@ int main(int argc, char **argv)
       ierr = MPI_Send(data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
+  ierr = MPI_Barrier(MPI_COMM_WORLD);
   if(myrank==0){
     printf("TIME %d : %e (average %e msec, min %e msec, max %e msec)\n", myrank, t_sum,
 	   t_sum/(double)loops*1000.0,

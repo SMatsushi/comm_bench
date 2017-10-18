@@ -4,6 +4,8 @@
 #include <mpi.h>
 #include <cuda_runtime.h>
 
+#define min(a,b) (a<b?a:b)
+
 int main(int argc, char **argv)
 {
   int i;
@@ -12,32 +14,33 @@ int main(int argc, char **argv)
   int N = 1000, loops;
   double time, t_min=999999.99, t_max=0.0, t_sum=0.0;
   double *data, *d_data;
-  int gpu = -1;
+  int gpu=-1;
 
-  if(argc<3){
-    printf("usage: %s length loops\n", argv[0]);
+  if(argc!=5){
+    printf("usage: %s length loops gpuid gpuid\n", argv[0]);
     return -1;
   }
 
   N = atoi(argv[1]);
   loops = atoi(argv[2]);
 
-  ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
-  if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
+  //ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
+  //if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
+  ierr = MPI_Init(&argc,&argv);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
   if(nprocs!=2){
     printf("2 processes are required.\n");
     return -1;
   }
-  data = (double*)malloc(sizeof(double)*N);
+  data = (double*)malloc(sizeof(double)*N*2);
+  for(i=0;i<N*2;i++)data[i] = (double)i;
 
-  if(argc>=4)gpu = atoi(argv[3+myrank]);
-  if(gpu!=-1){
-      printf("%d cudaSetDevice(%d)\n", myrank, gpu);
-      cudaSetDevice(gpu);
-  }
-  cudaMalloc((void*)&d_data, sizeof(double)*N);
+  gpu = atoi(argv[3+myrank]);
+  printf("%d cudaSetDevice(%d)\n", myrank, gpu);
+  cudaSetDevice(gpu);
+  cudaMalloc((void*)&d_data, sizeof(double)*N*2);
+  cudaMemcpy(d_data,data,sizeof(double)*N*2,cudaMemcpyHostToDevice);
 
   ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<10; i++){
@@ -46,7 +49,7 @@ int main(int argc, char **argv)
       ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
     }else if(myrank==1){
       ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-      ierr = MPI_Send(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+      ierr = MPI_Send(&d_data[N], N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
   ierr = MPI_Barrier(MPI_COMM_WORLD);
@@ -61,15 +64,24 @@ int main(int argc, char **argv)
       t_sum += time;
     }else if(myrank==1){
       ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-      ierr = MPI_Send(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+      ierr = MPI_Send(&d_data[N], N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
+  ierr = MPI_Barrier(MPI_COMM_WORLD);
   if(myrank==0){
-    printf("TIME %d : %e (average %e msec, min %e msec, max %e msec)\n", myrank, t_sum,
-	   t_sum/(double)loops*1000.0,
-	   t_min*1000.0,
-	   t_max*1000.0
+    printf("TIME %d : %e (average %e msec, min %e msec, max %e msec, average %f GByte/sec)\n",
+		   myrank, t_sum,
+		   t_sum/(double)loops*1000.0,
+		   t_min*1000.0,
+		   t_max*1000.0,
+		   (double)(sizeof(double)*loops*N)*2.0/t_sum/1024.0/1024.0/1024.0
 	   );
+	cudaMemcpy(data,d_data,sizeof(double)*N,cudaMemcpyDeviceToHost);
+	printf("result:");
+	for(i=0;i<min(N,10);i++){
+	  printf(" %f", data[i]);
+	}
+	printf("\n\n");
   }
 
   cudaFree(d_data);

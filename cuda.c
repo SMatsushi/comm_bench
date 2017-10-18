@@ -12,17 +12,19 @@ int main(int argc, char **argv)
   int N = 1000, loops;
   double time, t_min=999999.99, t_max=0.0, t_sum=0.0;
   double *data, *d_data;
+  int gpu=-1;
 
-  if(argc!=3){
-    printf("usage: %s length loops\n", argv[0]);
+  if(argc!=4){
+    printf("usage: %s length loops gpuid\n", argv[0]);
     return -1;
   }
 
   N = atoi(argv[1]);
   loops = atoi(argv[2]);
 
-  ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
-  if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
+  //ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
+  //if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
+  ierr = MPI_Init(&argc,&argv);
   ierr = MPI_Comm_rank(MPI_COMM_WORLD, &myid);
   ierr = MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
   if(nprocs!=1){
@@ -31,14 +33,16 @@ int main(int argc, char **argv)
   }
 
   data = (double*)malloc(sizeof(double)*N);
+
+  gpu = atoi(argv[3]);
+  printf("cudaSetDevice(%d)\n", gpu);
+  cudaSetDevice(gpu);
   cudaMalloc((void*)&d_data, sizeof(double)*N);
 
-  ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<10; i++){
     cudaMemcpy(d_data, data, sizeof(double)*N, cudaMemcpyHostToDevice);
     cudaMemcpy(data, d_data, sizeof(double)*N, cudaMemcpyDeviceToHost);
   }
-  ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<loops; i++){
     time = MPI_Wtime();
     cudaMemcpy(d_data, data, sizeof(double)*N, cudaMemcpyHostToDevice);

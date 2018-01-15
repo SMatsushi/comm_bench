@@ -1,6 +1,6 @@
 CC=mpicc
 COPTS=-O3
-CUDADIR=/lustre/app/acc/cuda/8.0.44
+CUDADIR?=/lustre/app/acc/cuda/8.0.44
 NCCLDIR=./nccl2
 
 all: reduce_nccl2_1n2m reduce_nccl2_2n1m

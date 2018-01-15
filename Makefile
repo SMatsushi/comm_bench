@@ -21,6 +21,12 @@ ifeq ($(SYS),ito)
 #    CC=mpicc
 #    DIR=ito_openmpi-3.0.0_gnu
 #  endif
+  ifeq ($(ENV),ito_openmpi-1.10.7)
+    COPTS=-O3 -openmp
+    CC=mpicc
+    FC=mpifort
+    DIR=ito_openmpi-1.10.7
+  endif
   ifeq ($(ENV),ito_openmpi-3.0.0_gnu)
     COPTS=-O3 -fopenmp
     CC=~/opt/openmpi-3.0.0_gnu/bin/mpicc
@@ -62,6 +68,19 @@ ifeq ($(SYS),ito)
     DIR=ito_pgi
     #CUDADIR=/usr/local/cuda-8.0
   endif
+  ifeq ($(ENV),ito_pgi177)
+#	PGIDIR=~/opt/pgi/linux86-64/17.4
+#	MPIDIR=~/opt/pgi/linux86-64/2017/mpi/openmpi-1.10.2
+	CUDADIR=/home/usr0/m70000a/opt/pgi/linux86-64/2017/cuda/8.0
+    COPTS=-fast -mp -tp=haswell -Minfo=all
+    FOPTS=-fast -mp -tp=haswell -Minfo=all -Mfree
+	CCUOPTS=-ta=tesla,cuda8.0,cc60 -I${CUDADIR}/include -L${CUDADIR}/lib64
+	FCUOPTS=-ta=tesla,cuda8.0,cc60 -I${CUDADIR}/include -L${CUDADIR}/lib64
+    CC=mpicc
+    FC=mpifort
+    DIR=ito_pgi177
+    #CUDADIR=/usr/local/cuda-8.0
+  endif
   ifeq ($(ENV),ito_pgi_ce)
 	PGIDIR=~/opt/pgi/linux86-64/17.4
 	MPIDIR=~/opt/pgi/linux86-64/2017/mpi/openmpi-1.10.2
@@ -83,6 +102,9 @@ NCCLDIR=./nccl
 gdr: cuda cpu2cpu cpu2gpu gpu2gpu cpu2cpu2gpu gpu2cpu2cpu2gpu cuda_p2p
 
 cuda: cuda.c
+	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
+	${CC} ${COPTS} -o ${DIR}/$@ -lcudart $^
+cuda_bw: cuda_bw.c
 	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
 	${CC} ${COPTS} -o ${DIR}/$@ -lcudart $^
 cpu2cpu: cpu2cpu.c
@@ -110,6 +132,13 @@ checknode: checknode.c
 
 checkdevice: checkdevice.c
 	${CC} ${COPTS} -o ${DIR}/$@ -lcudart $^
+
+cpu2cpu_f: cpu2cpu.f90
+	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
+	${FC} ${FOPTS} -g -o ${DIR}/$@ $^
+checkdevice_cuf: checkdevice.cuf
+	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
+	${FC} ${FOPTS} -g -o ${DIR}/$@ $^
 
 reduce_cpu: reduce_cpu.c
 	${CC} ${COPTS} -o $@ $^

@@ -57,8 +57,8 @@ int main(int argc, char **argv)
     if(myrank==0){
       time = MPI_Wtime();
       ierr = MPI_Send(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
-      ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
       time = MPI_Wtime() - time;
+      ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
       if(time>t_max)t_max=time;
       if(time<t_min)t_min=time;
       t_sum += time;

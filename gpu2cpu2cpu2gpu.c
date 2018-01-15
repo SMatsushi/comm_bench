@@ -17,7 +17,7 @@ int main(int argc, char **argv)
   int gpu=-1;
 
   if(argc!=5){
-    printf("usage: %s length loops gpuid gpuid\n", argv[0]);
+    printf("usage: %s length loops gpuid1 gpuid2\n", argv[0]);
     return -1;
   }
 
@@ -62,8 +62,8 @@ int main(int argc, char **argv)
       time = MPI_Wtime();
       cudaMemcpy(data, d_data, sizeof(double)*N, cudaMemcpyDeviceToHost);
       ierr = MPI_Send(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
-      ierr = MPI_Recv(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
       cudaMemcpy(d_data, data, sizeof(double)*N, cudaMemcpyHostToDevice);
+      ierr = MPI_Recv(data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
       time = MPI_Wtime() - time;
       if(time>t_max)t_max=time;
       if(time<t_min)t_min=time;

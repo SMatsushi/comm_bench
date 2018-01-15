@@ -1,22 +1,8 @@
-#!/bin/bash
-#PBS -q h-debug
-#PBS -l select=1:mpiprocs=2
-#PBS -W group_list=gi75
-#PBS -l walltime=1:00
+#/bin/bash
+#PJM -L "vnode=1"
+#PJM -L "vnode-core=36"
+#PJM -L "rscunit=ito-b"
+#PJM -L "rscgrp=ito-g-16"
+#PJM -L "elapse=1:00"
 
-cd ${PBS_O_WORKDIR}
-#env
-. /etc/profile.d/modules.sh
-module load openmpi-gdr/2.1.1/intel cuda/8.0.44 intel/17.0.2.174
-ulimit -s 1000000
-export OMP_NUM_THREADS=1
-
-cat<<EOF > test_run.sh
-#!/bin/sh
-env
-EOF
-
-chmod u+x ./test_run.sh
-
-mpirun -np 2 -mca btl_openib_want_cuda_gdr 1 ./test_run.sh
-
+ls -al /usr/lib64

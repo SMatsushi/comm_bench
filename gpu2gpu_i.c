@@ -52,14 +52,22 @@ int main(int argc, char **argv)
   for(i=0; i<10; i++){
     if(myrank==0){
       ierr = MPI_Isend(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request);
+	  if(i==0)printf("0 after isend\n");
 	  ierr = MPI_Wait(&request, &status);
+	  if(i==0)printf("0 after wait1\n");
       ierr = MPI_Irecv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request);
+	  if(i==0)printf("0 after irecv\n");
 	  ierr = MPI_Wait(&request, &status);
+	  if(i==0)printf("0 after wait2\n");
     }else if(myrank==1){
       ierr = MPI_Irecv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &request);
+	  if(i==0)printf("1 after irecv\n");
 	  ierr = MPI_Wait(&request, &status);
+	  if(i==0)printf("1 after wait1\n");
       ierr = MPI_Isend(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &request);
+	  if(i==0)printf("1 after isend\n");
 	  ierr = MPI_Wait(&request, &status);
+	  if(i==0)printf("1 after wait2\n");
     }
   }
   printf("pre-benchmark end\n");

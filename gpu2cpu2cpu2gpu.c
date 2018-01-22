@@ -15,6 +15,7 @@ int main(int argc, char **argv)
   double time, t_min=999999.99, t_max=0.0, t_sum=0.0;
   double *data, *d_data;
   int gpu=-1;
+  cudaError_t cerr;
 
   if(argc!=5){
     printf("usage: %s length loops gpuid1 gpuid2\n", argv[0]);
@@ -23,6 +24,7 @@ int main(int argc, char **argv)
 
   N = atoi(argv[1]);
   loops = atoi(argv[2]);
+  printf("N=%d, loops=%d\n", N, loops);
 
   //ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
   //if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");
@@ -39,9 +41,12 @@ int main(int argc, char **argv)
   gpu = atoi(argv[3+myrank]);
   printf("%d cudaSetDevice(%d)\n", myrank, gpu);
   cudaSetDevice(gpu);
-  cudaMalloc((void*)&d_data, sizeof(double)*N*2);
-  cudaMemcpy(d_data,data,sizeof(double)*N*2,cudaMemcpyHostToDevice);
+  cerr = cudaMalloc((void*)&d_data, sizeof(double)*N*2);
+  if(cerr!=cudaSuccess){printf("cudaMalloc failed (%s)\n", cudaGetErrorString(cerr)); MPI_Finalize(); return -1;}
+  cerr = cudaMemcpy(d_data,data,sizeof(double)*N*2,cudaMemcpyHostToDevice);
+  if(cerr!=cudaSuccess){printf("cudaMemcpy failed (%s)\n", cudaGetErrorString(cerr)); MPI_Finalize(); return -1;}
 
+  printf("pre-benchmark begin\n");
   ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<10; i++){
     if(myrank==0){
@@ -56,7 +61,9 @@ int main(int argc, char **argv)
       ierr = MPI_Send(&data[N], N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
+  printf("pre-benchmark end\n");
   ierr = MPI_Barrier(MPI_COMM_WORLD);
+  printf("benchmark begin\n");
   for(i=0; i<loops; i++){
     if(myrank==0){
       time = MPI_Wtime();
@@ -75,6 +82,7 @@ int main(int argc, char **argv)
       ierr = MPI_Send(&data[N], N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
   }
+  printf("benchmark end\n");
   ierr = MPI_Barrier(MPI_COMM_WORLD);
   if(myrank==0){
     printf("TIME %d : %e (average %e msec, min %e msec, max %e msec, average %f GByte/sec)\n",

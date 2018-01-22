@@ -99,7 +99,7 @@ endif
 
 NCCLDIR=./nccl
 
-gdr: cuda cpu2cpu cpu2gpu gpu2gpu cpu2cpu2gpu gpu2cpu2cpu2gpu cuda_p2p
+gdr: cuda cpu2cpu cpu2gpu gpu2gpu gpu2gpu_i cpu2cpu2gpu gpu2cpu2cpu2gpu cuda_p2p
 
 cuda: cuda.c
 	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
@@ -114,6 +114,9 @@ cpu2gpu: cpu2gpu.c
 	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
 	${CC} ${COPTS} -o ${DIR}/$@ -lcudart $^
 gpu2gpu: gpu2gpu.c
+	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
+	${CC} ${COPTS} -o ${DIR}/$@ -lcudart $^
+gpu2gpu_i: gpu2gpu_i.c
 	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
 	${CC} ${COPTS} -o ${DIR}/$@ -lcudart $^
 cpu2cpu2gpu: cpu2cpu2gpu.c

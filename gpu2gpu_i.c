@@ -10,12 +10,13 @@ int main(int argc, char **argv)
 {
   int i;
   int myrank, nprocs, ierr, provided;
-  MPI_Status status;
   int N = 1000, loops;
   double time, t_min=999999.99, t_max=0.0, t_sum=0.0;
   double *data, *d_data;
   int gpu=-1;
   cudaError_t cerr;
+  MPI_Request request;
+  MPI_Status status;
 
   if(argc!=5){
     printf("usage: %s length loops gpuid gpuid\n", argv[0]);
@@ -50,11 +51,15 @@ int main(int argc, char **argv)
   ierr = MPI_Barrier(MPI_COMM_WORLD);
   for(i=0; i<10; i++){
     if(myrank==0){
-      ierr = MPI_Send(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
-      ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
+      ierr = MPI_Isend(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request);
+	  ierr = MPI_Wait(&request, &status);
+      ierr = MPI_Irecv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request);
+	  ierr = MPI_Wait(&request, &status);
     }else if(myrank==1){
-      ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-      ierr = MPI_Send(&d_data[N], N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+      ierr = MPI_Irecv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &request);
+	  ierr = MPI_Wait(&request, &status);
+      ierr = MPI_Isend(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &request);
+	  ierr = MPI_Wait(&request, &status);
     }
   }
   printf("pre-benchmark end\n");
@@ -63,15 +68,19 @@ int main(int argc, char **argv)
   for(i=0; i<loops; i++){
     if(myrank==0){
       time = MPI_Wtime();
-      ierr = MPI_Send(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+      ierr = MPI_Isend(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request);
+	  ierr = MPI_Wait(&request, &status);
       time = MPI_Wtime() - time;
-      ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &status);
+      ierr = MPI_Irecv(d_data, N, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request);
+	  ierr = MPI_Wait(&request, &status);
       if(time>t_max)t_max=time;
       if(time<t_min)t_min=time;
       t_sum += time;
     }else if(myrank==1){
-      ierr = MPI_Recv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &status);
-      ierr = MPI_Send(&d_data[N], N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+      ierr = MPI_Irecv(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &request);
+	  ierr = MPI_Wait(&request, &status);
+	  ierr = MPI_Isend(d_data, N, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &request);
+	  ierr = MPI_Wait(&request, &status);
     }
   }
   printf("benchmark end\n");

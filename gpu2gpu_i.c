@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
   N = atoi(argv[1]);
   loops = atoi(argv[2]);
-  printf("N=%d, loops=%d\n", N, loops);
+  printf("N=%d, %d byte, loops=%d\n", N, sizeof(double)*N, loops);
 
   //ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_FUNNELED,&provided);
   //if(provided!=MPI_THREAD_FUNNELED)printf("MPI_THREAD_FUNNELED is not provided.\n");

@@ -108,26 +108,23 @@ mpirun -n 2 -display-devel-map -map-by ppr:2:socket --mca plm_rsh_agent /bin/pjr
 
 ########
 
-n=1
 bench_g2g_1s 0 0 1
-for i in `seq 0 26`
+for i in `seq 0 11`
 do
-    n=$(( $n * 2 ))
+	n=`echo "2 ^ $i" | bc`
 	bench_g2g_1s $n 0 1
 done
 
-n=1
 bench_g2g_2s 0 1 2
-for i in `seq 0 26`
+for i in `seq 0 11`
 do
-    n=$(( $n * 2 ))
+	n=`echo "2 ^ $i" | bc`
 	bench_g2g_2s $n 1 2
 done
 
-n=1
 bench_g2g_2s 0 1 3
-for i in `seq 0 26`
+for i in `seq 0 11`
 do
-    n=$(( $n * 2 ))
+    n=`echo "2 ^ $i" | bc`
 	bench_g2g_2s $n 1 3
 done

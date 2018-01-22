@@ -64,34 +64,16 @@ mpirun -n 2 -display-devel-map -map-by ppr:1:node --mca plm_rsh_agent /bin/pjrsh
 
 ########
 
-# n=1
-# bench_g2g 0 0 0 0 0
-# for i in `seq 0 26`
-# do
-#     n=$(( $n * 2 ))
-# 	bench_g2g $n 0 0 0 0 0
-# done
-# 
-# n=1
-# bench_g2g 0 0 0 1 3
-# for i in `seq 0 26`
-# do
-#     n=$(( $n * 2 ))
-# 	bench_g2g $n 0 0 0 1 3
-# done
-
-n=1
 bench_g2g 0 1 3 0 0
-for i in `seq 0 26`
+for i in `seq 0 11`
 do
-    n=$(( $n * 2 ))
+	n=`echo "2 ^ $i" | bc`
 	bench_g2g $n 1 3 0 0
 done
 
-n=1
 bench_g2g 0 1 3 1 3
-for i in `seq 0 26`
+for i in `seq 0 11`
 do
-    n=$(( $n * 2 ))
+	n=`echo "2 ^ $i" | bc`
 	bench_g2g $n 1 3 1 3
 done

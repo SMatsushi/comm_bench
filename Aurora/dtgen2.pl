@@ -8,14 +8,13 @@ $fid=0;
 %bws=();
 %cmt=();
 
+printf("Creating '%s' ...\n", $fname);
 while(<>) {
-    if (/^transfer/) {
+    if (/^logname=(\S+)$/) {
+        $log=$1;
         $fid++;
-        chomp;
-        s/^transfer\s+rate\s+//;
-        s/^between\s+//;
-        printf("fid=%d: %s\n", $fid, $_);
-        $cmt{$fid} = $_;
+        printf("fid=%d: %s\n", $fid, $log);
+        $cmt{$fid} = $log;
     } elsif (/average\s+([\d\.]+)\s+(GByte)/) {
         $bw=$1;
     } elsif (/^result:\s*(\d+)\.\d+/) {

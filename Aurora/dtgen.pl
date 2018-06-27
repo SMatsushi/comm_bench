@@ -2,11 +2,12 @@
 
 $fid=0;
 while(<>) {
-    if (/^transfer/) {
+    if (/^logname=(\S+)$/) {
+        $commt=$1;
         close OF;
-        $fname = "data-".$fid.".csv";
+        $fname = "data-".$commt.".csv";
         open (OF, "> $fname") || die "Cannot open $fname for write";
-        printf(OF "# %s", $_);
+        printf(OF "%s\n", $commt);
         printf(OF "Size,GBps\n");
         $fid++;
     } elsif (/average\s+([\d\.]+)\s+(GByte)/) {

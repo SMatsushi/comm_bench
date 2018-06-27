@@ -15,6 +15,12 @@ ifeq ($(SYS),rbh)
 endif
 
 
+ifeq ($(ENV),aurora)
+    COPTS=-O3 $(XCOPTS)
+    CC=mpincc
+    DIR=Aurora
+endif
+
 ifeq ($(SYS),ito)
 #  ifeq ($(ENV),ito_openmpi-3.0.0_gnu)
 #    COPTS=-O3 -fopenmp
@@ -99,7 +105,8 @@ endif
 
 NCCLDIR=./nccl
 
-gdr: cuda cpu2cpu cpu2gpu gpu2gpu gpu2gpu_i cpu2cpu2gpu gpu2cpu2cpu2gpu cuda_p2p
+gdr: cpu2cpu
+# gdr: cuda cpu2cpu cpu2gpu gpu2gpu gpu2gpu_i cpu2cpu2gpu gpu2cpu2cpu2gpu cuda_p2p
 
 cuda: cuda.c
 	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
@@ -109,6 +116,7 @@ cuda_bw: cuda_bw.c
 	${CC} ${COPTS} -o ${DIR}/$@ -lcudart $^
 cpu2cpu: cpu2cpu.c
 	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi
+	echo ENV=${ENV} : CC=${CC} COPTS=${COPTS} DIR=${DIR} $@ $^
 	${CC} ${COPTS} -o ${DIR}/$@ $^
 cpu2gpu: cpu2gpu.c
 	@if [ ! -d ${DIR} ]; then mkdir -p ${DIR}; fi

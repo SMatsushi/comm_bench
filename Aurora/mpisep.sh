@@ -1,4 +1,6 @@
 #!/bin/sh
+# (C) Copyright NEC Corporation 2018
+
 ID=${MPIUNIVERSE}:${MPIRANK}
 case ${MPILX_SEPSELECT:-${NMPI_SEPSELECT:-2}} in
 1) exec $* 1>> stdout.${ID}                  ;;

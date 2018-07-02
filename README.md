@@ -25,9 +25,9 @@ Redirect stdout to 'foo.log'. and run following perl script creates csv file fro
 
 ## MPI communicatin trace by mpirun command
 Set the following envrironment variable before running 'mpirun'.
-> $ export NMPI_COMMINF=<MMM>
+> $ export NMPI_COMMINF=\[MMM\]
 
-<MMM> is ether NO, YES, ALL (NO is default).
+\[MMM\] is ether NO, YES, ALL (NO is default).
    * NO  : outputs no communication inforamation (Default).
    * YES : outputh communication summary.
    * ALL : outputs extended communication infomartion.

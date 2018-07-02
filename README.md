@@ -9,7 +9,6 @@ Isolated cpu2cpu.c from original comm_bench for benchmarking communication of Ve
 # Usage
 ## How to compile
 > $ cd Aurora  
-
 > $ sh ./compile.sh
 
 ## How to run
@@ -17,12 +16,12 @@ Isolated cpu2cpu.c from original comm_bench for benchmarking communication of Ve
 > $ run.sh
 
 ## Result analysis
-cpu2cpu binary outputs benchmark result to stdout.
+Executable 'cpu2cpu' outputs benchmark result to stdout.
 Redirect stdout to 'foo.log'. and run following perl script creates csv file from 'foo.log'
 > $ cd Aurora  
 > $ dtgen2.pl foo.log
 
-dtgen.pl creates separate csv files for each cpu2cpu run. 
+'dtgen.pl' creates separate csv files for each cpu2cpu run in a single 'foo.log' . 
 
 ------
 # Original comm_bench

@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+# (C) Copyright NEC Enterprise Communication Technologi Inc. 2018
 
 $fname = "commbench.csv";
 open (OF, "> $fname") || die "Cannot open $fname for write";

@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+## (C) Copyright NEC Enterprise Communication Technologi Inc. 2018
 
 $fid=0;
 while(<>) {

@@ -23,6 +23,20 @@ Redirect stdout to 'foo.log'. and run following perl script creates csv file fro
 
 'dtgen.pl' creates separate csv files for each cpu2cpu run in a single 'foo.log' . 
 
+## MPI communicatin trace by mpirun command
+Set the following envrironment variable before running 'mpirun'.
+> $ export NMPI_COMMINF=<MMM>
+
+<MMM> is ether NO, YES, ALL (NO is default).
+   * NO  : outputs no communication inforamation (Default).
+   * YES : outputh communication summary.
+   * ALL : outputs extended communication infomartion.
+
+### mpisep.sh
+ As multiple processes are executed by mpirun, mpisep.sh isolates output of each process to different files.
+ Please take a look at Aurora/{run.sh, mpisep.sh} for detail.
+
+
 ------
 # Original comm_bench
 Consists benchmarks for following communication pattern:

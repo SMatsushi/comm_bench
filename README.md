@@ -21,23 +21,23 @@ Executable 'cpu2cpu' outputs benchmark result to stdout.
 'run.sh' runs multiple 'cpu2cpu' with 'mpirun' with multiple communication pattern
 in multiple burst (number of element in double array) size.  
 
-Sample output of 'run.sh' is committed as 'run\_sh-201806.stdout'.  
+Sample output of 'run.sh' is committed as 'run_sh-201806.stdout'.  
 
 ## Result analysis
 
 ### dtgen2.pl
 
-Redirect stdout to 'foo.log', then run perl script 'dtgen2.pl' to convert it to wide\-format csv file 'commbench.csv'.
+Redirect stdout to 'foo.log', then run perl script 'dtgen2.pl' to convert it to wide-format csv file 'commbench.csv'.
 
-You can generate 'commbench.csv' from sample 'run\_sh\-2018.stdout' with following commands.
+You can generate 'commbench.csv' from sample 'run_sh-2018.stdout' with following commands.
 
 > $ cd Aurora  
-> $ dtgen2.pl run\_sh\-201806.stdout
+> $ dtgen2.pl run_sh-201806.stdout
 
 Note) 'dtgen.pl' creates a separate csv file from each 'cpu2cpu' run in 'foo.log'.  
  
 ### comm-graph2.R
-'comm\-graph2.R' is a sample R scripts which reads 'commbench.csv' and creates a graph 'comm\-graph.png'.  
+'comm\-graph2.R' is a sample R scripts which reads 'commbench.csv' and creates a graph 'commbench-graph.png'.  
 
 Sample 'commbench.csv' is also checked in. The R scripts can be run with 'R' command..
 

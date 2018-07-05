@@ -17,11 +17,20 @@ Isolated cpu2cpu.c from original comm_bench for benchmarking communication of Ve
 
 ## Result analysis
 Executable 'cpu2cpu' outputs benchmark result to stdout.
-Redirect stdout to 'foo.log'. and run following perl script creates csv file from 'foo.log'
+Redirect stdout to 'foo.log'. and run perl script 'dtgen2.pl' to convert it to wide-format csv file 'commbench.csv'.
 > $ cd Aurora  
 > $ dtgen2.pl foo.log
 
-'dtgen.pl' creates separate csv files for each cpu2cpu run in a single 'foo.log' . 
+Note) 'dtgen.pl' creates a separate csv file from each 'cpu2cpu' run in 'foo.log'.  
+  
+'comm-graph2.R' is a sample R scripts which reads 'commbench.csv' and creates a graph 'comm-graph.png'.  
+
+You need to install R package 'tidyverse' and 'ggplot2'.
+
+Sample 'commbench.csv' is checked in.
+
+> $ comm-graph2.R  
+
 
 ## MPI communicatin trace by mpirun command
 Set the following envrironment variable before running 'mpirun'.

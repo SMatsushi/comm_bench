@@ -39,10 +39,14 @@ Note) 'dtgen.pl' creates a separate csv file from each 'cpu2cpu' run in 'foo.log
 ### comm-graph2.R
 'comm\-graph2.R' is a sample R scripts which reads 'commbench.csv' and creates a graph 'comm\-graph.png'.  
 
-Sample 'commbench.csv' is also checked in.
+Sample 'commbench.csv' is also checked in. The R scripts can be run with 'R' command..
 
-> $ comm\-graph2.R 
+> $ R  
+> \> source('comm-graph2.R')
 
+Rstudio (Rstudio server on linux + web access) can be used instead of command line.  
+  
+  
 Note) R package 'tidyverse' and 'ggplot2' are required. Install as follows.  
 
 > $ R  
@@ -50,6 +54,8 @@ Note) R package 'tidyverse' and 'ggplot2' are required. Install as follows.
 > \> install.packages("tidyverse")  
 
  The installtion takes while.
+ 
+ Occasionally these installation would be failed due to missing libraries, etc. Please take a look at the error message and install them with 'yum' or 'rpm'.
  
 ## Getting MPI communication profile with 'mpirun' command
 

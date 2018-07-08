@@ -8,13 +8,16 @@ Isolated cpu2cpu.c from original comm_bench for benchmarking communication of Ve
 ------
 # Usage
 ## How to compile
-> $ cd Aurora  
-> $ sh ./compile.sh
+```
+$ cd Aurora
+$ sh ./compile.sh
+```
 
 ## How to run
-
-> $ cd Aurora  
-> $ run.sh  
+```
+$ cd Aurora
+$ run.sh
+```
 
 Executable 'cpu2cpu' outputs benchmark result to stdout.  
 
@@ -31,27 +34,32 @@ Redirect stdout to 'foo.log', then run perl script 'dtgen2.pl' to convert it to 
 
 You can generate 'commbench.csv' from sample 'run_sh-2018.stdout' with following commands.
 
-> $ cd Aurora  
-> $ dtgen2.pl run_sh-201806.stdout
+```
+$ cd Aurora
+$ dtgen2.pl run_sh-201806.stdout
+```
 
 Note) 'dtgen.pl' creates a separate csv file from each 'cpu2cpu' run in 'foo.log'.  
  
 ### comm-graph2.R
-'comm\-graph2.R' is a sample R scripts which reads 'commbench.csv' and creates a graph 'commbench-graph.png'.  
+'comm-graph2.R' is a sample R scripts which reads 'commbench.csv' and creates a graph 'commbench-graph.png'.  
 
 Sample 'commbench.csv' is also checked in. The R scripts can be run with 'R' command..
 
-> $ R  
-> \> source('comm-graph2.R')
+```
+ $ R
+ > source('comm-graph2.R')
+```
 
 Rstudio (Rstudio server on linux + web access) can be used instead of command line.  
   
   
 Note) R package 'tidyverse' and 'ggplot2' are required. Install as follows.  
-
-> $ R  
-> \> install.packages("ggplot2")  
-> \> install.packages("tidyverse")  
+```
+$ R
+> install.packages("ggplot2")
+> install.packages("tidyverse")
+```
 
  The installtion takes while.
  
@@ -60,7 +68,9 @@ Note) R package 'tidyverse' and 'ggplot2' are required. Install as follows.
 ## Getting MPI communication profile with 'mpirun' command
 
 Set the following envrironment variable before running 'mpirun'.
-> $ export NMPI_COMMINF=\[MMM\]
+```
+$ export NMPI_COMMINF=[MMM]
+```
 
 \[MMM\] is ether NO, YES, ALL (NO is default).
    * NO  : outputs no communication inforamation (Default).
